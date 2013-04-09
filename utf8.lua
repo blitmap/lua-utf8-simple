@@ -10,23 +10,29 @@
 -- %xF4 %x80-8F 2( UTF8-tail )
 -- UTF8-tail = %x80-BF
 
+-- 0xxxxxxx                            | 007F   (127)
+-- 110xxxxx	10xxxxxx                   | 07FF   (2047)
+-- 1110xxxx	10xxxxxx 10xxxxxx          | FFFF   (65535)
+-- 11110xxx	10xxxxxx 10xxxxxx 10xxxxxx | 10FFFF (1114111)
+
 local utf8 = {}
 
--- returns the utf8 character length at i
+-- returns the utf8 character byte length at first-byte i
 utf8.clen =
 	function (s, i)
 		local c = string.byte(s, i)
 
-		if not c              then return   end
-		if c < 194 or c > 244 then return 1 end
-		if c < 224            then return 2 end
-		if c < 240            then return 3 end
+		if not c   then return   end
+		if c < 128 then return 1 end
+		if c < 194 then return   end -- 128-191 (continuing byte), 192-193 (invalid UTF8)
+		if c < 224 then return 2 end
+		if c < 240 then return 3 end
 
 		return 4
 	end
 
 -- generator to iterate over all utf8 chars
-utf8.chars =
+utf8.iter =
 	function (s)
 		local i = 0
 		local c = '#'
@@ -42,18 +48,19 @@ utf8.chars =
 				end
 
 				n = i + (n - 1)
+				c = string.sub(s, i, n)
 
-				return string.sub(s, i, n), i
+				return c, i
 			end
 	end
 
--- return the utf8 character at "character index" i, and the byte index
+-- return the "visual index" i + actual byte index of a character
 utf8.at =
 	function (s, i)
-		for c in utf8.chars(s) do
+		for c, x in utf8.iter(s) do
 			i = i - 1
 			if i == 0 then
-				return c
+				return c, x
 			end
 		end
 	end
@@ -63,7 +70,7 @@ utf8.len =
 	function (s)
 		local l = 0
 
-		for c in utf8.chars(s) do
+		for c in utf8.iter(s) do
 			l = l + 1
 		end
 
@@ -88,8 +95,24 @@ utf8.replace =
 	function (s, map)
 		local new = {}
 
-		for c in utf8.chars(s) do
+		for c in utf8.iter(s) do
 			table.insert(new, map[c] or c)
+
+			if #new > 63 then
+				new = { table.concat(new) }
+			end
+		end
+
+		return table.concat(new)
+	end
+
+-- reverse a utf8 string
+utf8.reverse =
+	function (s)
+		local new = {}
+
+		for c in utf8.iter(s) do
+			table.insert(new, 1, c)
 
 			if #new > 63 then
 				new = { table.concat(new) }
@@ -104,7 +127,7 @@ utf8.strip =
 	function (s)
 		local new = {}
 
-		for c in utf8.chars(s) do
+		for c in utf8.iter(s) do
 			if #c == 1 then
 				table.insert(new, c)
 

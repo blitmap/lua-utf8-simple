@@ -23,8 +23,7 @@ utf8.clen =
 		local c = string.byte(s, i)
 
 		if not c   then return   end
-		if c < 128 then return 1 end
-		if c < 194 then return   end -- 128-191 (continuing byte), 192-193 (invalid UTF8)
+		if c < 194 then return 1 end -- 0-127 (ascii), 128-191 (continuing byte), 192-193 (invalid UTF8) -> 1-byte
 		if c < 224 then return 2 end
 		if c < 240 then return 3 end
 

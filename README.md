@@ -4,10 +4,8 @@ This "library" is meant to be a very thin helper that you can easily drop in to 
 
 ## The Only Functions You Should Know
 
-
 ### utf8.iter(s)
-
-s: (string) the utf8 string to iterate over (by characters)
+- s: (string) the utf8 string to iterate over (by characters)
 
 ```lua
 -- i is the byte index within the string
@@ -37,8 +35,8 @@ Output:
 	15	ς	28
 
 ### utf8.map(s, f)
-s: (string) the utf8 string to map over
-f: (function) a function optionally accepting: f(visual_index, utf8_char, byte_index)
+- s: (string) the utf8 string to map over
+- f: (function) a function optionally accepting: f(visual_index, utf8_char, byte_index)
 
 returns: (nothing)
 
@@ -49,8 +47,8 @@ returns: (nothing)
 ## Others
 
 ### utf8.clen(s, i)
-s: (string) the utf8 string
-i: (number) the **byte index** of a utf8 character within s (defaults to 1)
+- s: (string) the utf8 string
+- i: (number) the **byte index** of a utf8 character within s (defaults to 1)
 
 returns: (number) the length of the utf8 character at i
 
@@ -62,8 +60,8 @@ note: call this on the first byte of the utf8 character, continuing or invalid u
 ```
 
 ### utf8.at(s, i):
-s: (string) the utf8 string
-i: (number) the utf8 character index (not the byte index)
+- s: (string) the utf8 string
+- i: (number) the utf8 character index (not the byte index)
 
 returns: (string, number) the utf8 character at that "visual index" + byte index within s
 
@@ -73,7 +71,7 @@ returns: (string, number) the utf8 character at that "visual index" + byte index
 ```
 
 ### utf8.len(s):
-s: (string) the utf8 string
+- s: (string) the utf8 string
 
 returns: (number) the number of utf8 characters in s (not the byte length)
 
@@ -85,7 +83,7 @@ note: be aware of "invisible" utf8 characters
 ```
 
 ### utf8.reverse(s):
-s: (string) the utf8 string
+- s: (string) the utf8 string
 
 returns: (string) the utf8-reversed form of s
 
@@ -97,7 +95,7 @@ note: reversing left-to-right utf8 strings that include directional formatting c
 ```
 
 ### utf8.strip(s):
-s: (string) the utf8 string
+- s: (string) the utf8 string
 
 returns: (string) s with all utf8 characters removed (characters > 1 byte)
 
@@ -107,8 +105,8 @@ catdog
 ```
 
 ### utf8.replace(s, map):
-s: (string) the utf8 string
-map: (table) keys are utf8 characters to replace, values are their replacement
+- s: (string) the utf8 string
+- map: (table) keys are utf8 characters to replace, values are their replacement
 
 returns: (string) s with all the key-characters in map replaced
 
@@ -121,9 +119,9 @@ Ey Ax
 ```
 
 ### utf8.sub(s, i, j):
-s: (string) the utf8 string
-i: (string) the starting utf8 substring to look for
-j: (stirng) the ending utf8 substring to look for
+- s: (string) the utf8 string
+- i: (string) the starting utf8 substring to look for
+- j: (stirng) the ending utf8 substring to look for
 
 returns: (string) the substring formed from i to j, inclusive
 

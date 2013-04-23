@@ -15,6 +15,7 @@
 -- 1110xxxx	10xxxxxx 10xxxxxx          | FFFF   (65535)
 -- 11110xxx	10xxxxxx 10xxxxxx 10xxxxxx | 10FFFF (1114111)
 
+local maxitems = 256
 local utf8char = '[%z\1-\127\194-\244][\128-\191]*'
 
 local utf8 = {}
@@ -61,23 +62,27 @@ utf8.at =
 -- returns the number of characters in a UTF-8 string
 utf8.len =
 	function (s)
-		local l = nil
-
-		for i in utf8.iter(s) do
-			l = i
-		end
-
-		return l
+		-- count the number of non-continuing bytes
+		return select(2, string.gsub(s, '[^\128-\193]', ''))
 	end
 
--- like string.sub() but i, j can be utf8 characters
+-- like string.sub() but i, j are utf8 strings
 utf8.sub =
 	function (s, i, j)
 		i = string.find(s, i, 1, true)
 
+		if not i then
+			return ''
+		end
+
 		if j then
 			local tmp = string.find(s, j, 1, true)
-			j = tmp + utf8.clen(j)
+
+			if not tmp then
+				return ''
+			end
+
+			j = (tmp - 1) + #j
 		end
 
 		return string.sub(s, i, j)
@@ -91,7 +96,7 @@ utf8.replace =
 		for _, c in utf8.iter(s) do
 			table.insert(new, map[c] or c)
 
-			if #new > 63 then
+			if #new > maxitems then
 				new = { table.concat(new) }
 			end
 		end
@@ -107,7 +112,7 @@ utf8.reverse =
 		for _, c in utf8.iter(s) do
 			table.insert(new, 1, c)
 
-			if #new > 63 then
+			if #new > maxitems then
 				new = { table.concat(new) }
 			end
 		end
@@ -124,7 +129,7 @@ utf8.strip =
 			if #c == 1 then
 				table.insert(new, c)
 
-				if #new > 63 then
+				if #new > maxitems then
 					new = { table.concat(new) }
 				end
 			end

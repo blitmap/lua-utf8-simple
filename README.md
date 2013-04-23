@@ -122,12 +122,12 @@ Ey Ax
 
 ### utf8.sub(s, i, j):
 s: (string) the utf8 string
-i: (string) the starting utf8 character
-j: (stirng) the ending utf8 character
+i: (string) the starting utf8 substring to look for
+j: (stirng) the ending utf8 substring to look for
 
 returns: (string) the substring formed from i to j, inclusive
 
 ```lua
-> = utf8.sub('Μου αρέσει τηγανίτες', 'τ', 'ς')
-τηγανίτες
+> = utf8.sub('Αγαπώ τηγανίτες', 'α', 'αν')
+απώ τηγαν
 ```

@@ -2,7 +2,8 @@
 
 This "library" is meant to be a very thin helper that you can easily drop in to another project without really calling it a dependency.  It aims to provide the most minimal of handling functions for working with utf8 strings.  It does not aim to be feature-complete or even error-descriptive.  It works for what is practical but not complex.  You have been warned. =^__^=
 
-## The Only Function You Should Know
+## The Only Functions You Should Know
+
 
 ### utf8.iter(s)
 
@@ -11,28 +12,39 @@ s: (string) the utf8 string to iterate over (by characters)
 ```lua
 -- i is the byte index within the string
 -- c is the full utf8 character (string)
-for i, c in utf8.iter('Αγαπώ τηγανίτες') do
-	print(i, c)
+-- b is the byte index within the utf8 string
+for i, c, b in utf8.iter('Αγαπώ τηγανίτες') do
+	print(i, c, b)
 end
 ```
 
 Output:
 
-	1	Α
-	3	γ
-	5	α
-	7	π
-	9	ώ
-	11		
-	12	τ
-	14	η
-	16	γ
-	18	α
-	20	ν
-	22	ί
-	24	τ
-	26	ε
-	28	ς
+	1	Α	1
+	2	γ	3
+	3	α	5
+	4	π	7
+	5	ώ	9
+	6		11
+	7	τ	12
+	8	η	14
+	9	γ	16
+	10	α	18
+	11	ν	20
+	12	ί	22
+	13	τ	24
+	14	ε	26
+	15	ς	28
+
+### utf8.map(s, f)
+s: (string) the utf8 string to map over
+f: (function) a function optionally accepting: f(visual_index, utf8_char, byte_index)
+
+returns: (nothing)
+
+```lua
+> utf8.map('Αγαπώ τηγανίτες', print) -- does the same as the above example
+```
 
 ## Others
 

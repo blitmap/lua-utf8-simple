@@ -15,12 +15,14 @@
 -- 1110xxxx	10xxxxxx 10xxxxxx          | FFFF   (65535)
 -- 11110xxx	10xxxxxx 10xxxxxx 10xxxxxx | 10FFFF (1114111)
 
+local utf8char = '[%z\1-\127\194-\244][\128-\191]*'
+
 local utf8 = {}
 
 -- returns the utf8 character byte length at first-byte i
 utf8.clen =
 	function (s, i)
-		local c = string.match(s, '[%z\1-\127\194-\244][\128-\191]*', i)
+		local c = string.match(s, utf8char, i)
 
 		if not c then
 			return
@@ -29,19 +31,29 @@ utf8.clen =
 		return #c
 	end
 
+-- maps f over s's utf8 characters f can accept args: (visual_index, utf8_character, byte_index)
+utf8.map =
+	function (s, f)
+		local i = 0
+                
+		for b, c in string.gmatch(s, '()(' .. utf8char .. ')') do
+			i = i + 1
+			f(i, c, b)
+		end 
+	end
+
 -- generator to iterate over all utf8 chars
 utf8.iter =
 	function (s)
-		return string.gmatch(s, '()([%z\1-\127\194-\244][\128-\191]*)')
+		return coroutine.wrap(function () return utf8.map(s, coroutine.yield) end)
 	end
 
 -- return the utf8 character at the "visual index" 'i' + actual byte index
 utf8.at =
-	function (s, i)
-		for x, c in utf8.iter(s) do
-			i = i - 1
-			if i == 0 then
-				return c, x
+	function (s, x)
+		for i, c, b in utf8.iter(s) do
+			if i == x then
+				return c, b
 			end
 		end
 	end
@@ -49,10 +61,10 @@ utf8.at =
 -- returns the number of characters in a UTF-8 string
 utf8.len =
 	function (s)
-		local l = 0
+		local l = nil
 
-		for _ in utf8.iter(s) do
-			l = l + 1
+		for i in utf8.iter(s) do
+			l = i
 		end
 
 		return l

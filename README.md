@@ -9,31 +9,30 @@ This "library" is meant to be a very thin helper that you can easily drop in to 
 s: (string) the utf8 string to iterate over (by characters)
 
 ```lua
-
--- c is the full utf8 character (string)
 -- i is the byte index within the string
-for c, i in utf8.iter('Αγαπώ τηγανίτες') do
-	print(c, i)
+-- c is the full utf8 character (string)
+for i, c in utf8.iter('Αγαπώ τηγανίτες') do
+	print(i, c)
 end
 ```
 
 Output:
 
-	Α	1
-	γ	3
-	α	5
-	π	7
-	ώ	9
-		11
-	τ	12
-	η	14
-	γ	16
-	α	18
-	ν	20
-	ί	22
-	τ	24
-	ε	26
-	ς	28
+	1	Α
+	3	γ
+	5	α
+	7	π
+	9	ώ
+	11		
+	12	τ
+	14	η
+	16	γ
+	18	α
+	20	ν
+	22	ί
+	24	τ
+	26	ε
+	28	ς
 
 ## Others
 
@@ -54,11 +53,11 @@ note: call this on the first byte of the utf8 character, continuing or invalid u
 s: (string) the utf8 string
 i: (number) the utf8 character index (not the byte index)
 
-returns: (string) the utf8 character at that index (1-4 bytes)
+returns: (string, number) the utf8 character at that "visual index" + byte index within s
 
 ```lua
 > = utf8.at('Αγαπώ τηγανίτες', 4)
-π
+π	7
 ```
 
 ### utf8.len(s):

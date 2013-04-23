@@ -20,43 +20,25 @@ local utf8 = {}
 -- returns the utf8 character byte length at first-byte i
 utf8.clen =
 	function (s, i)
-		local c = string.byte(s, i)
+		local c = string.match(s, '[%z\1-\127\194-\244][\128-\191]*', i)
 
-		if not c   then return   end
-		if c < 194 then return 1 end -- 0-127 (ascii), 128-191 (continuing byte), 192-193 (invalid UTF8) -> 1-byte
-		if c < 224 then return 2 end
-		if c < 240 then return 3 end
+		if not c then
+			return
+		end
 
-		return 4
+		return #c
 	end
 
 -- generator to iterate over all utf8 chars
 utf8.iter =
 	function (s)
-		local i = 0
-		local c = '#'
-
-		return
-			function ()
-				i = i + #c
-
-				local n = utf8.clen(s, i)
-
-				if not n then
-					return
-				end
-
-				n = i + (n - 1)
-				c = string.sub(s, i, n)
-
-				return c, i
-			end
+		return string.gmatch(s, '()([%z\1-\127\194-\244][\128-\191]*)')
 	end
 
--- return the "visual index" i + actual byte index of a character
+-- return the utf8 character at the "visual index" 'i' + actual byte index
 utf8.at =
 	function (s, i)
-		for c, x in utf8.iter(s) do
+		for x, c in utf8.iter(s) do
 			i = i - 1
 			if i == 0 then
 				return c, x
@@ -69,7 +51,7 @@ utf8.len =
 	function (s)
 		local l = 0
 
-		for c in utf8.iter(s) do
+		for _ in utf8.iter(s) do
 			l = l + 1
 		end
 
@@ -94,7 +76,7 @@ utf8.replace =
 	function (s, map)
 		local new = {}
 
-		for c in utf8.iter(s) do
+		for _, c in utf8.iter(s) do
 			table.insert(new, map[c] or c)
 
 			if #new > 63 then
@@ -110,7 +92,7 @@ utf8.reverse =
 	function (s)
 		local new = {}
 
-		for c in utf8.iter(s) do
+		for _, c in utf8.iter(s) do
 			table.insert(new, 1, c)
 
 			if #new > 63 then
@@ -126,7 +108,7 @@ utf8.strip =
 	function (s)
 		local new = {}
 
-		for c in utf8.iter(s) do
+		for _, c in utf8.iter(s) do
 			if #c == 1 then
 				table.insert(new, c)
 

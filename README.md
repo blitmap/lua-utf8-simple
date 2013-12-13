@@ -8,9 +8,9 @@ This "library" is meant to be a very thin helper that you can easily drop in to 
 - s: (string) the utf8 string to iterate over (by characters)
 
 ```lua
--- i is the byte index within the string
--- c is the full utf8 character (string)
--- b is the byte index within the utf8 string
+-- i is the character/letter index within the string
+-- c is the utf8 character (string of 1 or more bytes)
+-- b is the byte index within the string
 for i, c, b in utf8.iter('Αγαπώ τηγανίτες') do
 	print(i, c, b)
 end

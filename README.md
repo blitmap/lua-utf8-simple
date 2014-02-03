@@ -1,8 +1,14 @@
-# lua-utf8
+# lua-utf8-simple
 
 This "library" is meant to be a very thin helper that you can easily drop in to another project without really calling it a dependency.  It aims to provide the most minimal of handling functions for working with utf8 strings.  It does not aim to be feature-complete or even error-descriptive.  It works for what is practical but not complex.  You have been warned. =^__^=
 
-## The Only Functions You Should Know
+## The require() Line
+
+```lua
+local utf8 = require('utf8_simple')
+```
+
+## The Only Functions You Need to Know
 
 ### utf8.iter(s)
 - s: (string) the utf8 string to iterate over (by characters)
@@ -35,8 +41,8 @@ Output:
 	15	ς	28
 
 ### utf8.map(s, f)
-- s: (string) the utf8 string to map over
-- f: (function) a function optionally accepting: f(visual_index, utf8_char, byte_index)
+- s: (string) the utf8 string to map 'f' over
+- f: (function) a function accepting: f(visual_index, utf8_char, byte_index)
 
 returns: (nothing)
 

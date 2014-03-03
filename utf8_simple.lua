@@ -100,22 +100,27 @@ utf8.sub =
 
 		if i > j then return '' end
 
-		local init = i
+		local diff = j - i
+		local iter = utf8.chars(s, true)
 
-		for x, c, b in utf8.chars(s, true) do
-			-- collect i start-byte index
-			if init == x then
-				i = b
-			end
+		-- advance up to i
+		for _ = 1, i - 1 do iter() end
 
-			-- collect j end-byte index
-			if j == x then
-				j = b + c - 1
-				break
-			end
+		local c, b = select(2, iter())
+
+		-- i and j are the same, single-charaacter sub
+		if diff == 0 then
+			return string.sub(s, b, b + c - 1)
 		end
 
-		return string.sub(s, i, j)
+		i = b
+
+		-- advance up to j
+		for _ = 1, diff - 1 do iter() end
+
+		c, b = select(2, iter())
+
+		return string.sub(s, i, b + c - 1)
 	end
 
 return utf8

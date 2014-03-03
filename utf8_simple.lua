@@ -15,127 +15,107 @@
 -- 1110xxxx	10xxxxxx 10xxxxxx          | FFFF   (65535)
 -- 11110xxx	10xxxxxx 10xxxxxx 10xxxxxx | 10FFFF (1114111)
 
-local maxitems = 256
-local utf8char = '[%z\1-\127\194-\244][\128-\191]*'
+local pattern = '[%z\1-\127\194-\244][\128-\191]*'
+
+-- helper function
+local posrelat =
+	function (pos, len)
+		if pos < 0 then
+			pos = len + pos + 1
+		end
+
+		return pos
+	end
 
 local utf8 = {}
 
--- returns the utf8 character byte length at first-byte i
-utf8.clen =
-	function (s, i)
-		local c = string.match(s, utf8char, i)
-
-		if not c then
-			return
-		end
-
-		return #c
-	end
+-- THE MEAT
 
 -- maps f over s's utf8 characters f can accept args: (visual_index, utf8_character, byte_index)
 utf8.map =
-	function (s, f)
+	function (s, f, no_subs)
 		local i = 0
-                
-		for b, c in string.gmatch(s, '()(' .. utf8char .. ')') do
-			i = i + 1
-			f(i, c, b)
-		end 
-	end
 
--- generator to iterate over all utf8 chars
-utf8.iter =
-	function (s)
-		return coroutine.wrap(function () return utf8.map(s, coroutine.yield) end)
-	end
-
--- return the utf8 character at the "visual index" 'i' + actual byte index
-utf8.at =
-	function (s, x)
-		for i, c, b in utf8.iter(s) do
-			if i == x then
-				return c, b
+		if no_subs then
+			for b, e in s:gmatch('()' .. pattern .. '()') do
+				i = i + 1
+				local c = e - b
+				f(i, c, b)
+			end
+		else
+			for b, c in s:gmatch('()(' .. pattern .. ')') do
+				i = i + 1
+				f(i, c, b)
 			end
 		end
+	end
+
+-- THE REST
+
+-- generator for the above -- to iterate over all utf8 chars
+utf8.chars =
+	function (s, no_subs)
+		return coroutine.wrap(function () return utf8.map(s, coroutine.yield, no_subs) end)
 	end
 
 -- returns the number of characters in a UTF-8 string
 utf8.len =
 	function (s)
 		-- count the number of non-continuing bytes
-		return select(2, string.gsub(s, '[^\128-\193]', ''))
-	end
-
--- like string.sub() but i, j are utf8 strings
-utf8.sub =
-	function (s, i, j)
-		i = string.find(s, i, 1, true)
-
-		if not i then
-			return ''
-		end
-
-		if j then
-			local tmp = string.find(s, j, 1, true)
-
-			if not tmp then
-				return ''
-			end
-
-			j = (tmp - 1) + #j
-		end
-
-		return string.sub(s, i, j)
+		return select(2, s:gsub('[^\128-\193]', ''))
 	end
 
 -- replace all utf8 chars with mapping
 utf8.replace =
-	function (s, map)
-		local new = {}
-
-		for _, c in utf8.iter(s) do
-			table.insert(new, map[c] or c)
-
-			if #new > maxitems then
-				new = { table.concat(new) }
-			end
-		end
-
-		return table.concat(new)
+	function (s, map, ascii_too)
+		return s:gsub(pattern, map)
 	end
 
 -- reverse a utf8 string
 utf8.reverse =
 	function (s)
-		local new = {}
+		-- reverse the individual greater-than-single-byte characters
+		s = s:gsub(pattern, function (c) return #c > 1 and c:reverse() end)
 
-		for _, c in utf8.iter(s) do
-			table.insert(new, 1, c)
-
-			if #new > maxitems then
-				new = { table.concat(new) }
-			end
-		end
-
-		return table.concat(new)
+		return s:reverse()
 	end
 
--- strip utf8 characters from a string
+-- strip non-ascii characters from a utf8 string
 utf8.strip =
 	function (s)
-		local new = {}
+		return s:gsub(pattern, function (c) return #c > 1 and '' end)
+	end
 
-		for _, c in utf8.iter(s) do
-			if #c == 1 then
-				table.insert(new, c)
+-- like string.sub() but i, j are utf8 strings
+-- a utf8-safe string.sub()
+utf8.sub =
+	function (s, i, j)
+		local l = utf8.len(s)
 
-				if #new > maxitems then
-					new = { table.concat(new) }
-				end
+		i =       posrelat(i, l)
+		j = j and posrelat(j, l) or l
+
+		if i < 1 then i = 1 end
+		if j > l then j = l end
+
+		if i > j then return '' end
+
+		local init = i
+
+		for x, c, b in utf8.chars(s, true) do
+			-- collect i start-byte index
+			if init == x then
+				i = b
+			end
+
+			-- collect j end-byte index
+			if j == x then
+				j = b + c - 1
+				break
 			end
 		end
 
-		return table.concat(new)
+		return string.sub(s, i, j)
 	end
 
 return utf8

@@ -118,7 +118,7 @@ note: reversing left-to-right utf8 strings that include directional formatting c
 ### utf8.strip(s)
 - s: (string) the utf8 string
 
-returns: (string) s with all utf8 characters removed (characters > 1 byte)
+returns: (string) s with all non-ascii characters removed (characters > 1 byte)
 
 ```lua
 > = utf8.strip('cat♥dog')

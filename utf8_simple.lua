@@ -67,7 +67,7 @@ utf8.len =
 
 -- replace all utf8 chars with mapping
 utf8.replace =
-	function (s, map, ascii_too)
+	function (s, map)
 		return s:gsub(pattern, map)
 	end
 

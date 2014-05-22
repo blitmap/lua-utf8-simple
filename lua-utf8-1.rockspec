@@ -1,4 +1,4 @@
-package = 'utf8'
+package = 'utf8_simple'
 version = 'scm-1'
 
 source = { url = 'git://github.com/Pogs/lua-utf8-simple.git' }
@@ -12,4 +12,4 @@ description =
 		maintainer = 'Sir Pogsalot <coroutines+github@gmail.com>'
 	}
 
-build = { type = 'builtin', modules = { utf8 = 'utf8_simple.lua' } }
+build = { type = 'builtin', modules = { utf8_simple = 'utf8_simple.lua' } }
